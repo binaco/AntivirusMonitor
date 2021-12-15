@@ -72,14 +72,7 @@ bool KillProcessByName(DWORD processID, const std::wstring& name)
 
     if (processName == name)
     {
-        if (!TerminateProcess(process.GetHandle(), 1))
-        {
-            return 0;
-        }
-        else
-        {
-            return 1;
-        }
+        return TerminateProcess(process.GetHandle(), 1);
     }
 
     return 0;
@@ -109,13 +102,13 @@ DWORD __stdcall ThreadProc(const LPVOID lpParameter)
                 }
             }
         }
+        mutex.lock();
         if (isKilled)
         {
-            mutex.lock();
             bannedProcess.IncrementCount();
             std::cout << "Processes killed: " << bannedProcess.GetCount() << std::endl;
-            mutex.unlock();
         }
+        mutex.unlock();
     }
 	return 0;
 }

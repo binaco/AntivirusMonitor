@@ -1,4 +1,4 @@
 ﻿  AntivirusMonitor.cpp
 C:\Users\sotni\source\repos\AntivirusMonitor\AntivirusMonitor.cpp(66,102): warning C4267: 'argument': conversion from 'size_t' to 'DWORD', possible loss of data
-C:\Users\sotni\source\repos\AntivirusMonitor\AntivirusMonitor.cpp(145,69): warning C4267: 'argument': conversion from 'size_t' to 'DWORD', possible loss of data
+C:\Users\sotni\source\repos\AntivirusMonitor\AntivirusMonitor.cpp(138,69): warning C4267: 'argument': conversion from 'size_t' to 'DWORD', possible loss of data
   AntivirusMonitor.vcxproj -> C:\Users\sotni\source\repos\AntivirusMonitor\x64\Debug\AntivirusMonitor.exe
