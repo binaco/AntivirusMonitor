@@ -5,8 +5,6 @@
 #include <windows.h>
 #include <psapi.h>
 
-size_t g_killedProcessesCount = 0;
-
 class HandleWrapper
 {
 public:
@@ -29,6 +27,32 @@ public:
 private:
     HANDLE m_handle = INVALID_HANDLE_VALUE;
 };
+
+struct BannedProcess
+{
+public:
+    BannedProcess(std::wstring name) :
+        m_name(name)
+    {
+
+    }
+    void IncrementCount()
+    {
+        ++m_killedProcessesCount;
+    }
+    std::wstring GetName() const
+    {
+        return m_name;
+    }
+    size_t GetCount() const
+    {
+        return m_killedProcessesCount;
+    }
+private:
+    static size_t m_killedProcessesCount;
+    std::wstring m_name;
+};
+size_t BannedProcess::m_killedProcessesCount = 0;
 
 bool KillProcessByName(DWORD processID, const std::wstring& name)
 {
@@ -63,9 +87,9 @@ bool KillProcessByName(DWORD processID, const std::wstring& name)
 
 DWORD __stdcall ThreadProc(const LPVOID lpParameter)
 {
-	const std::wstring bannedProcess = *static_cast<std::wstring*>(lpParameter);
+    BannedProcess bannedProcess = *static_cast<BannedProcess*>(lpParameter);
     std::mutex mutex;
-    while (g_killedProcessesCount < 5)
+    while (bannedProcess.GetCount() < 5)
     {
         Sleep(1000);
         DWORD processes[1024], bytesReturned;
@@ -79,7 +103,7 @@ DWORD __stdcall ThreadProc(const LPVOID lpParameter)
         {
             if (processes[i])
             {
-                if (KillProcessByName(processes[i], bannedProcess))
+                if (KillProcessByName(processes[i], bannedProcess.GetName()))
                 {
                     isKilled = true;
                 }
@@ -88,8 +112,8 @@ DWORD __stdcall ThreadProc(const LPVOID lpParameter)
         if (isKilled)
         {
             mutex.lock();
-            ++g_killedProcessesCount;
-            std::cout << "Processes killed: " << g_killedProcessesCount << std::endl;
+            bannedProcess.IncrementCount();
+            std::cout << "Processes killed: " << bannedProcess.GetCount() << std::endl;
             mutex.unlock();
         }
     }
@@ -102,13 +126,13 @@ int main()
 	std::getline(std::wcin, str);
 	std::wstringstream stream;
 	stream << str;
-	std::vector<std::wstring> bannedProcesses;
-	while (stream)
-	{
-		std::wstring temp;
-		stream >> temp;
-		bannedProcesses.push_back(temp);
-	}
+    std::vector<BannedProcess> bannedProcesses;
+    while (stream)
+    {
+        std::wstring temp;
+        stream >> temp;
+        bannedProcesses.push_back(temp);
+    }
 
 	std::vector<HANDLE> threads;
 	for (size_t i = 0; i < bannedProcesses.size(); ++i)
