@@ -3,7 +3,6 @@
 #include <vector>
 #include <mutex>
 #include <windows.h>
-#include <stdio.h>
 #include <psapi.h>
 
 size_t g_killedProcessesCount = 0;
@@ -40,7 +39,7 @@ bool KillProcessByName(DWORD processID, const std::wstring& name)
     }
 
     std::wstring processName(MAX_PATH, L'\0');
-    DWORD nameSize = GetModuleBaseName(process.Get(), 0, &processName[0], processName.length());
+    DWORD nameSize = GetModuleBaseNameW(process.Get(), 0, &processName[0], processName.length());
     if (!nameSize)
     {
         return 0;
@@ -62,13 +61,12 @@ bool KillProcessByName(DWORD processID, const std::wstring& name)
     return 0;
 }
 
-DWORD __stdcall ThreadProc(LPVOID lpParameter)
+DWORD __stdcall ThreadProc(const LPVOID lpParameter)
 {
-	std::wstring bannedProcess = *static_cast<std::wstring*>(lpParameter);
-    std::mutex lock;
+	const std::wstring bannedProcess = *static_cast<std::wstring*>(lpParameter);
+    std::mutex mutex;
     while (g_killedProcessesCount < 5)
     {
-        //lock.lock();
         Sleep(1000);
         DWORD processes[1024], bytesReturned;
         if (!EnumProcesses(processes, sizeof(processes), &bytesReturned))
@@ -89,10 +87,11 @@ DWORD __stdcall ThreadProc(LPVOID lpParameter)
         }
         if (isKilled)
         {
-            std::cout << "Process terminated successfully" << std::endl;
+            mutex.lock();
             ++g_killedProcessesCount;
+            std::cout << "Processes killed: " << g_killedProcessesCount << std::endl;
+            mutex.unlock();
         }
-        //lock.unlock();
     }
 	return 0;
 }
