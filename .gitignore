@@ -31,5 +31,8 @@
 *.out
 *.app
 
-# Debug Folder
+# Folders
 /x64/
+/Debug/
+/.vs/
+/v16/
