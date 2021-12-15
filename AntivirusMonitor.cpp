@@ -28,7 +28,7 @@ private:
     HANDLE m_handle = INVALID_HANDLE_VALUE;
 };
 
-struct BannedProcess
+class BannedProcess
 {
 public:
     BannedProcess(std::wstring name) :
