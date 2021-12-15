@@ -20,7 +20,7 @@ public:
             CloseHandle(m_handle);
         }
     }
-    HANDLE Get() const
+    HANDLE GetHandle() const
     {
         return m_handle;
     }
@@ -57,13 +57,13 @@ size_t BannedProcess::m_killedProcessesCount = 0;
 bool KillProcessByName(DWORD processID, const std::wstring& name)
 {
     HandleWrapper process(OpenProcess(PROCESS_ALL_ACCESS, FALSE, processID));
-    if (!process.Get())
+    if (!process.GetHandle())
     {
         return 0;
     }
 
     std::wstring processName(MAX_PATH, L'\0');
-    DWORD nameSize = GetModuleBaseNameW(process.Get(), 0, &processName[0], processName.length());
+    DWORD nameSize = GetModuleBaseNameW(process.GetHandle(), 0, &processName[0], processName.length());
     if (!nameSize)
     {
         return 0;
@@ -72,7 +72,7 @@ bool KillProcessByName(DWORD processID, const std::wstring& name)
 
     if (processName == name)
     {
-        if (!TerminateProcess(process.Get(), 1))
+        if (!TerminateProcess(process.GetHandle(), 1))
         {
             return 0;
         }
